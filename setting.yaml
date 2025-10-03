@@ -1,68 +1,31 @@
 project_name: "stock_screening_preproc"
-inputs:
-  - "data/2010/fy-balance_sheet.csv"
-  - "data/2010/fy-income_statement.csv"
-  - "data/2010/fy-cash_flow_statement.csv"
-  - "data/2010/stock_dividend.csv"
-  - "data/2011/fy-balance_sheet.csv"
-  - "data/2011/fy-income_statement.csv"
-  - "data/2011/fy-cash_flow_statement.csv"
-  - "data/2011/stock_dividend.csv"
-  - "data/2012/fy-balance_sheet.csv"
-  - "data/2012/fy-income_statement.csv"
-  - "data/2012/fy-cash_flow_statement.csv"
-  - "data/2012/stock_dividend.csv"
-  - "data/2013/fy-balance_sheet.csv"
-  - "data/2013/fy-income_statement.csv"
-  - "data/2013/fy-cash_flow_statement.csv"
-  - "data/2013/stock_dividend.csv"
-  - "data/2014/fy-balance_sheet.csv"
-  - "data/2014/fy-income_statement.csv"
-  - "data/2014/fy-cash_flow_statement.csv"
-  - "data/2014/stock_dividend.csv"
-  - "data/2015/fy-balance_sheet.csv"
-  - "data/2015/fy-income_statement.csv"
-  - "data/2015/fy-cash_flow_statement.csv"
-  - "data/2015/stock_dividend.csv"
-  - "data/2016/fy-balance_sheet.csv"
-  - "data/2016/fy-income_statement.csv"
-  - "data/2016/fy-cash_flow_statement.csv"
-  - "data/2016/stock_dividend.csv"
-  - "data/2017/fy-balance_sheet.csv"
-  - "data/2017/fy-income_statement.csv"
-  - "data/2017/fy-cash_flow_statement.csv"
-  - "data/2017/stock_dividend.csv"
-  - "data/2018/fy-balance_sheet.csv"
-  - "data/2018/fy-income_statement.csv"
-  - "data/2018/fy-cash_flow_statement.csv"
-  - "data/2018/stock_dividend.csv"
-  - "data/2019/fy-balance_sheet.csv"
-  - "data/2019/fy-income_statement.csv"
-  - "data/2019/fy-cash_flow_statement.csv"
-  - "data/2019/stock_dividend.csv"
-  - "data/2020/fy-balance_sheet.csv"
-  - "data/2020/fy-income_statement.csv"
-  - "data/2020/fy-cash_flow_statement.csv"
-  - "data/2020/stock_dividend.csv"
-  - "data/2021/fy-balance_sheet.csv"
-  - "data/2021/fy-income_statement.csv"
-  - "data/2021/fy-cash_flow_statement.csv"
-  - "data/2021/stock_dividend.csv"
-  - "data/2022/fy-balance_sheet.csv"
-  - "data/2022/fy-income_statement.csv"
-  - "data/2022/fy-cash_flow_statement.csv"
-  - "data/2022/stock_dividend.csv"
-  - "data/2023/fy-balance_sheet.csv"
-  - "data/2023/fy-income_statement.csv"
-  - "data/2023/fy-cash_flow_statement.csv"
-  - "data/2023/stock_dividend.csv"
-  - "data/2024/fy-balance_sheet.csv"
-  - "data/2024/fy-income_statement.csv"
-  - "data/2024/fy-cash_flow_statement.csv"
-  - "data/2024/stock_dividend.csv"
-  - "data/2025/fy-balance_sheet.csv
-  - "data/2025/fy-income_statement.csv"
-  - "data/2025/fy-cash_flow_statement.csv"
-  - "data/2025/stock_dividend.csv"
-
-output_path: "output/result.csv"
+data_path: "./data"
+years:
+  - 2010
+  - 2011
+  - 2012
+  - 2013
+  - 2014
+  - 2015
+  - 2016
+  - 2017
+  - 2018
+  - 2019
+  - 2020
+  - 2021
+  - 2022
+  - 2023
+  - 2024
+  - 2025
+files:
+  - fy-balance-sheet.csv
+  - fy-cash-flow-statement.csv
+  - fy-profit-and-loss.csv
+  - fy-stock-dividend.csv
+output:
+  base_path: "./output"
+  files:
+    fy-balance-sheet.csv: "all_fy-balance-sheet.csv"
+    fy-cash-flow-statement.csv: "all_fy-cash-flow-statement.csv"
+    fy-profit-and-loss.csv: "all_fy-profit-and-loss.csv"
+    fy-stock-dividend.csv: "all_fy-stock-dividend.csv"

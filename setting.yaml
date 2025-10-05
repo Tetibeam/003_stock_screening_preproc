@@ -22,6 +22,8 @@ files:
   - fy-cash-flow-statement.csv
   - fy-profit-and-loss.csv
   - fy-stock-dividend.csv
+files_reference:
+  - CodeData.csv
 output:
   base_path: "./output"
   files:

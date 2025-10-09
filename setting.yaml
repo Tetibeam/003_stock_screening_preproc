@@ -24,6 +24,11 @@ files:
   - fy-stock-dividend.csv
 files_reference:
   - CodeData.csv
+na_values:
+  - "-"
+  - "0"
+  - "NaN"
+  - ""
 output:
   base_path: "./output"
   files:

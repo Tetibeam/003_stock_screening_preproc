@@ -4,7 +4,7 @@
 今プロジェクトは株式銘柄スクリーニングのデータ準備工程です。CSVファイルを読み込み、欠損値・異常値を処理し、1つの整形済みファイルにまとめる前処理ツールです。
 
 ## 入力ファイル
-- `input/
+- `data/
   財務データのCSVファイル群
 - 参照元：IR BANK
   [https://irbank.net/download](https://irbank.net/download)

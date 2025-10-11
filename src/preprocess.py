@@ -28,7 +28,8 @@ def filter_code_by_latest_year(df):
         pd.DataFrame: 最新の年に上場している銘柄のコードリスト
     """
     df["西暦"] = df["年度"].astype(str).str[:4].astype(int)
-    latest_year = df["西暦"].max()
-    #print(latest_year)
+    #latest_year = df["西暦"].max()
+    latest_year = 2024
+    print(latest_year)
     latest_df = df[df["西暦"] == latest_year]["コード"].to_list()
     return latest_df

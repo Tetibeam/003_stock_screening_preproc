@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import pandas as pd
 
@@ -47,4 +48,3 @@ def chk_missing_value_exploration(df):
         columns=["col","nan","na","n/a","-","--","none","0","","alphabet"]
     )
     return placeholder_counts
-

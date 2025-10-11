@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import pandas as pd
 
@@ -29,7 +30,7 @@ def filter_code_by_latest_year(df):
     """
     df["西暦"] = df["年度"].astype(str).str[:4].astype(int)
     #latest_year = df["西暦"].max()
-    latest_year = 2024
+    latest_year = 2025
     print(latest_year)
     latest_df = df[df["西暦"] == latest_year]["コード"].to_list()
     return latest_df

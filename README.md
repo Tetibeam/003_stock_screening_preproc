@@ -10,7 +10,7 @@
   [https://irbank.net/download](https://irbank.net/download)
 - 対象データ：通期データ（2010～2025年）
 
-- data/
+- data/  
   東証上場企業銘柄一覧
 - 参照元：https://www.jpx.co.jp/markets/statistics-equities/misc/01.html
 

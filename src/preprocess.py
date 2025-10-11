@@ -28,7 +28,8 @@ def get_code_list_by_year(df, year):
         list: 指定された年度のコードリスト。
     """
     return df[df['西暦'] == year]['コード'].unique().tolist()
-def filter_by_latest_year_code(df):
+def filter_by_code_list(df, code_list):
+
 def get_code_info_by_latest_year():
     """
     最新年度のコード情報を取得します。

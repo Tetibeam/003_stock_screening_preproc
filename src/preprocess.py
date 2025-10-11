@@ -16,25 +16,19 @@ def merge_all_data(all_df_by_files):
         df = all_df_by_files[filename]
         merged = pd.merge(merged, df, on=["コード", "年度"], how="outer")
     return merged
-def get_code_list_by_year(df, year):
+
+def filter_code_by_latest_year(df):
     """
-    指定された年度のコードリストを取得します。
+    最新の年に上場している銘柄のコードリストを返します。
 
     Args:
-        df (pd.DataFrame): データフレーム。列に"西暦"を含み、四桁の西暦が記載されている。
-        year (int): 取得する年度。
+        df (pd.DataFrame): 列に"コード"、"年度"を含むDataFrame。
 
     Returns:
-        list: 指定された年度のコードリスト。
+        pd.DataFrame: 最新の年に上場している銘柄のコードリスト
     """
-    return df[df['西暦'] == year]['コード'].unique().tolist()
-def filter_by_code_list(df, code_list):
-
-def get_code_info_by_latest_year():
-    """
-    最新年度のコード情報を取得します。
-
-    Returns:
-        pd.DataFrame: 最新年度のコードリストを含むDataFrame。
-    """
-    return pd.read_csv(os.path.join("data", "latest_year_code_list.csv"), dtype={'コード': str})
+    df["西暦"] = df["年度"].astype(str).str[:4].astype(int)
+    latest_year = df["西暦"].max()
+    #print(latest_year)
+    latest_df = df[df["西暦"] == latest_year]["コード"].to_list()
+    return latest_df

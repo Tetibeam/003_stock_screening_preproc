@@ -17,3 +17,34 @@ def chk_yearly_header(base_path, years, files):
             if os.path.exists(file_path):
                 df = pd.read_csv(file_path,header=1)
                 print("年：",year," ","ファイル名:",filename," ","列",df.columns.to_list())
+def chk_missing_value_exploration(df):
+    """
+    Nanの表現方法を探索します。
+
+    Args:
+        df (pd.DataFrame): 探索するDataFrame。
+    Return:
+        pd.DataFrame：各表現を列にとった数
+    """
+    #"nan", "na", "n/a", "null", "-", "--", "none", ""
+    counts = []
+    for col in df:
+        ser = df[col].fillna('')
+        counts.append(
+            (col,
+            (ser == 'nan').sum(),
+            (ser == 'na').sum(),
+            (ser == 'n/a').sum(),
+            (ser == '-').sum(),
+            (ser == '--').sum(),
+            (ser == 'none').sum(),
+            (ser == '0').sum(),
+            (ser == '').sum(),
+            ser.str.contains('[A-Za-z]', na=False).sum())
+        )
+    placeholder_counts = pd.DataFrame(
+        counts, 
+        columns=["col","nan","na","n/a","-","--","none","0","","alphabet"]
+    )
+    return placeholder_counts
+

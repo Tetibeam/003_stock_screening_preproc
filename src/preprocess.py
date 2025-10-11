@@ -16,18 +16,18 @@ def merge_all_data(all_df_by_files):
         df = all_df_by_files[filename]
         merged = pd.merge(merged, df, on=["コード", "年度"], how="outer")
     return merged
-def get_latest_year_code_list(df, year):
+def get_code_list_by_year(df, year):
     """
     指定された年度のコードリストを取得します。
 
     Args:
-        df (pd.DataFrame): データフレーム。
+        df (pd.DataFrame): データフレーム。列に"西暦"を含み、四桁の西暦が記載されている。
         year (int): 取得する年度。
 
     Returns:
         list: 指定された年度のコードリスト。
     """
-    return df[df['年度'] == year]['コード'].unique().tolist()
+    return df[df['西暦'] == year]['コード'].unique().tolist()
 def filter_by_latest_year_code(df):
 def get_code_info_by_latest_year():
     """

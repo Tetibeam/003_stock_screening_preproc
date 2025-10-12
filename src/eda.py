@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import pandas as pd
+from IPython.display import display
 
 def chk_yearly_header(base_path, years, files):
     """
@@ -12,12 +13,27 @@ def chk_yearly_header(base_path, years, files):
         files (list): 読み込むファイル名のリスト。
 
     """
+    col_list = []
     for filename in files:
         for year in years:
             file_path = os.path.join(base_path, str(year), filename)
             if os.path.exists(file_path):
                 df = pd.read_csv(file_path,header=1)
-                print("年：",year," ","ファイル名:",filename," ","列",df.columns.to_list())
+                col = df.columns.tolist()
+                col_list.append((filename, year, col))
+    return col_list
+
+def chk_listed_company(df, code_list):
+    """
+    コードリストとデータに乗っているコードを比較します
+
+    Args:
+        df (pd.DataFrame): 列に"コード"を含むDataFrame。
+        code_list (list): 銘柄のコードリスト
+
+
+    """
+
 def chk_missing_value_exploration(df):
     """
     Nanの表現方法を探索します。

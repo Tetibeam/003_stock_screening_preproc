@@ -22,17 +22,6 @@ def chk_yearly_header(base_path, years, files):
                 col_list.append((filename, year, col))
     return col_list
 
-def chk_listed_company(df, code_list):
-    """
-    コードリストとデータに乗っているコードを比較します
-
-    Args:
-        df (pd.DataFrame): 列に"コード"を含むDataFrame。
-        code_list (list): 銘柄のコードリスト
-
-
-    """
-
 def chk_missing_value_exploration(df):
     """
     Nanの表現方法を探索します。
@@ -63,6 +52,18 @@ def chk_missing_value_exploration(df):
         columns=["col","nan","na","n/a","-","--","none","0","","alphabet"]
     )
     return placeholder_counts
+
+def chk_listed_company(df, code_list):
+    """
+    コードリストとデータにあるコードを比較します
+
+    Args:
+        df (pd.DataFrame): 列に"コード"を含むDataFrame。
+        code_list (list): 銘柄のコードリスト
+
+
+    """
+    
 
 def merge_all_data(all_df_by_files):
     """

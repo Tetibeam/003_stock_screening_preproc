@@ -31,9 +31,6 @@ years:
   - 2024
   - 2025
 na_values:
-  - "-"
-  - "0"
-  - "NaN"
   - ""
 output:
   base_path: "./output"

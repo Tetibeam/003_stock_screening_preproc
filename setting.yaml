@@ -1,5 +1,18 @@
-project_name: "stock_screening_preproc"
-data_path: "./data"
+project_name: "stock_screening"
+data_path:
+  raw: "./data/raw"
+  interim: "./data/interim"
+  processed: "./data/processed"
+files:
+  raw:
+    - fy-balance-sheet.csv
+    - fy-cash-flow-statement.csv
+    - fy-profit-and-loss.csv
+    - fy-stock-dividend.csv
+  reference:
+    - CodeData.csv
+  interim:
+  processed:
 years:
   - 2010
   - 2011
@@ -17,13 +30,6 @@ years:
   - 2023
   - 2024
   - 2025
-files:
-  - fy-balance-sheet.csv
-  - fy-cash-flow-statement.csv
-  - fy-profit-and-loss.csv
-  - fy-stock-dividend.csv
-files_reference:
-  - CodeData.csv
 na_values:
   - "-"
   - "0"
@@ -31,8 +37,3 @@ na_values:
   - ""
 output:
   base_path: "./output"
-  files:
-    fy-balance-sheet.csv: "all_fy-balance-sheet.csv"
-    fy-cash-flow-statement.csv: "all_fy-cash-flow-statement.csv"
-    fy-profit-and-loss.csv: "all_fy-profit-and-loss.csv"
-    fy-stock-dividend.csv: "all_fy-stock-dividend.csv"

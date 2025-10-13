@@ -1,21 +1,67 @@
 # -*- coding: utf-8 -*-
 import os
 import pandas as pd
-def load_data_by_files(base_path, year, file, na_values=[""]):
+import dateutil
+def load_data_by_files(base_path, years, files, na_values=[""]):
     """
     ファイルごとに読み込み、辞書として返します。
 
     Args
         base_path (str): データが格納されているベースパス。
-        year (int): 読み込む年度。
-        file (str): 読み込むファイル名。
+        years (list): 読み込む年度のリスト。
+        files (list): 読み込むファイル名のリスト。
+        na_values (list): 欠損値として扱う値のリスト。
     Returns:
-        pd.DataFrame: 読み込んだDataFrame。
+        dict: ファイル名+年度をキーとし、DataFrameを値とする辞書。
+
     """
-    file_path = os.path.join(base_path, str(year), file)
-    if os.path.exists(file_path):
-        df = pd.read_csv(file_path, header=1, na_values=na_values, dtype={'コード': str})
-    return df
+    df_by_files = {}
+    for filename in files:
+        for year in years:
+            file_path = os.path.join(base_path, str(year), filename)
+            if os.path.exists(file_path):
+                df = pd.read_csv(file_path, header=1, na_values=na_values, dtype={'コード': str, '年度': str})
+                df["年度"] = pd.to_datetime(df["年度"], format="%Y/%m")
+                df_by_files[(filename, year)] = df
+            else:
+                df_by_files[(filename, year)] = pd.DataFrame()
+    return df_by_files
+
+def update_duplicated(df_by_files,latest_year):
+    """
+    重複しているデータを更新し,削除します
+    Args:
+        df_by_files (dict): ファイル名+年度をダブルキーとし、DataFrameを値とする辞書。
+        year (str): 更新する年度
+    Returns:
+        dict: ファイル名+年度をキーとし、DataFrameを値とする辞書。
+
+    """
+    df_all_datas_by_files = {}
+    cutoff_date = cutoff_date = pd.to_datetime(f"{str(latest_year)}-01-01")
+    #print(cutoff_date)
+    all_files = {key[0] for key in df_by_files.keys()}
+    for file in all_files:
+        df_source_raw = df_by_files.get((file, latest_year))
+        if df_source_raw is None:
+            print(f"警告: {file} の2025年データが見つかりません。スキップします。")
+            continue
+        # フィルタリング条件を作成: '年度'が基準日より小さいデータのみ抽出
+        df_update_source = df_source_raw[df_source_raw["年度"] < cutoff_date]
+        df_update_source = df_update_source.set_index(["コード", "年度"])
+        #display(df_update_source)
+        # --- 2. 過去の全年のデータを更新 ---
+        all_years = {key[1] for key in df_by_files.keys() if key[0] == file}
+        for year in all_years:
+            df_target = df_by_files.get((file, year))
+            if df_target is None:
+                continue
+            df_target_indexed = df_target.set_index(["コード", "年度"])
+
+            df_target_indexed.update(df_update_source)
+            df_target_indexed = df_target_indexed.reset_index()
+            df_all_datas_by_files[(file, year)] = df_target_indexed
+    return df_all_datas_by_files
 
 def load_yearly_data(base_path, years, files, na_values=[""]):
     """

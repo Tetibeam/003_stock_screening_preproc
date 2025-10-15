@@ -2,7 +2,7 @@
 import os
 import pandas as pd
 import dateutil
-def load_data_by_files(base_path, years, files, na_values=[""]):
+def load_data_by_files(base_path, years, files):
     """
     ファイルごとに読み込み、辞書として返します。
 
@@ -20,7 +20,7 @@ def load_data_by_files(base_path, years, files, na_values=[""]):
         for year in years:
             file_path = os.path.join(base_path, str(year), filename)
             if os.path.exists(file_path):
-                df = pd.read_csv(file_path, header=1, na_values=na_values, dtype={'コード': str, '年度': str})
+                df = pd.read_csv(file_path, header=1, keep_default_na=False, na_filter=False, dtype=str)
                 df["年度"] = pd.to_datetime(df["年度"], format="%Y/%m")
                 df_by_files[(filename, year)] = df
             else:

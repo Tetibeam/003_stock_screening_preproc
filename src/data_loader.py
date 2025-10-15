@@ -20,11 +20,27 @@ def load_data_by_files(base_path, years, files):
             file_path = os.path.join(base_path, str(year), filename)
             if os.path.exists(file_path):
                 df = pd.read_csv(file_path, header=1, keep_default_na=False, na_filter=False, dtype=str)
-                df["年度"] = pd.to_datetime(df["年度"], format="%Y/%m")
+                #df["年度"] = pd.to_datetime(df["年度"], format="%Y/%m")
                 df_by_files[(filename, year)] = df
             else:
                 df_by_files[(filename, year)] = pd.DataFrame()
     return df_by_files
+
+def chk_file_missing(df):
+    """
+    データフレームが空か可動化を調べます。
+    Args:
+        df (pd.DataFrame): チェックするデータフレーム。
+    Returns:
+    """
+    flg = True
+    if df.empty:
+        print("❌ ","データフレームが空です")
+        flg = False
+    if flg:
+        print("✅ ファイルは欠損していません。")
+    return df
+
 
 def update_duplicated(df_by_files,latest_year):
     """

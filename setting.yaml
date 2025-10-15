@@ -3,14 +3,14 @@ data_path:
   raw: "./data/raw"
   interim: "./data/interim"
   processed: "./data/processed"
+  reference: "./data/reference"
 files:
   raw:
     - fy-balance-sheet.csv
     - fy-cash-flow-statement.csv
     - fy-profit-and-loss.csv
     - fy-stock-dividend.csv
-  reference:
-    - CodeData.csv
+  reference: "CodeData.csv"
   interim:
   processed:
 years:

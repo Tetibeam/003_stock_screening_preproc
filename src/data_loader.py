@@ -10,7 +10,6 @@ def load_data_by_files(base_path, years, files):
         base_path (str): データが格納されているベースパス。
         years (list): 読み込む年度のリスト。
         files (list): 読み込むファイル名のリスト。
-        na_values (list): 欠損値として扱う値のリスト。
     Returns:
         dict: ファイル名+年度をキーとし、DataFrameを値とする辞書。
 

@@ -27,6 +27,7 @@ def convert_columns_type(df: pd.DataFrame, columns: list[str], to_type: str, ver
         if to_type == "int":
             # 無理な値は NaN にして Int64(nullable) に
             df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
+            print("done")
         elif to_type == "float":
             # 無理な値は NaN にして float64 に
             df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -91,8 +92,8 @@ def chk_dtype(df, filename, option_value):
     for col in df.columns:
         # 実際のデータ型を確認
         dtype = df[col].dtype
-        sample_types = df[col].dropna().map(type).unique()
-        #sample_types = df[col].map(type).unique()
+        #sample_types = df[col].dropna().map(type).unique()
+        sample_types = df[col].map(type).unique()
         row_data_tuple = (filename, option_value, col, dtype, sample_types)
         df_type.loc[current_index, COUNT_COLUMNS] = row_data_tuple
         #print(row_data_tuple)

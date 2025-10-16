@@ -1,6 +1,46 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import os
 import pandas as pd
+
+def convert_columns_type(df: pd.DataFrame, columns: list[str], to_type: str, verbose: bool = True) -> pd.DataFrame:
+    """
+    指定列を文字列から任意の型に変換します。
+
+    Args:
+        df : 変換対象のデータフレーム
+        columns :変換対象列名リスト
+        to_type : 変換先型。'int', 'float', 'str' のいずれか
+        verbose : 変換ログを表示するか
+    Returns : 変換後のデータフレーム（コピー）
+    """
+    df = df.copy()
+
+    for col in columns:
+        if col not in df.columns:
+            if verbose:
+                print(f"[WARN] 列 '{col}' が存在しません。スキップします。")
+            continue
+
+        if verbose:
+            print(f"\n列 '{col}' を {to_type} に変換中...")
+
+        if to_type == "int":
+            # 無理な値は NaN にして Int64(nullable) に
+            df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
+        elif to_type == "float":
+            # 無理な値は NaN にして float64 に
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+        elif to_type == "str":
+            # NaN も含めて文字列化
+            df[col] = df[col].astype(str)
+        else:
+            raise ValueError(f"変換先型 '{to_type}' はサポートされていません。")
+
+    return df
+
+
+
+
 
 def chk_missing_values_expression(df, filename, option_value):
     """
@@ -52,6 +92,7 @@ def chk_dtype(df, filename, option_value):
         # 実際のデータ型を確認
         dtype = df[col].dtype
         sample_types = df[col].dropna().map(type).unique()
+        #sample_types = df[col].map(type).unique()
         row_data_tuple = (filename, option_value, col, dtype, sample_types)
         df_type.loc[current_index, COUNT_COLUMNS] = row_data_tuple
         #print(row_data_tuple)

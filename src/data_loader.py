@@ -2,6 +2,48 @@
 import os
 import pandas as pd
 import dateutil
+
+def load_on_startup(base_path, folder, file):
+    """
+    ファイルをデータフレームで読み込みます。（型は強制的にstr）
+    
+    Args:
+        base_path(str):ファイルが格納されているベースパス。
+        folder(str):フォルダ名
+        file(str):ファイル名
+    Return:
+        pd.DataFrame: 読み込んだファイル
+    """
+    file_path = os.path.join(base_path, folder, file)
+    if os.path.exists(file_path):
+        df = pd.read_csv(file_path, header=0, keep_default_na=False, na_filter=False, dtype=str)
+    else:
+        df = pd.DataFrame()
+    return df
+
+def chk_file_missing(df):
+    """
+    データフレームが空か可動化を調べます。
+    Args:
+        df (pd.DataFrame): チェックするデータフレーム。
+    Returns:
+    """
+    flg = True
+    if df.empty:
+        print("❌ ","データフレームが空です")
+        flg = False
+    if flg:
+        print("✅ ファイルは欠損していません。")
+    return df
+
+
+
+
+
+
+
+
+
 def load_data_by_files(base_path, years, files):
     """
     ファイルごとに読み込み、辞書として返します。
@@ -26,20 +68,7 @@ def load_data_by_files(base_path, years, files):
                 df_by_files[(filename, year)] = pd.DataFrame()
     return df_by_files
 
-def chk_file_missing(df):
-    """
-    データフレームが空か可動化を調べます。
-    Args:
-        df (pd.DataFrame): チェックするデータフレーム。
-    Returns:
-    """
-    flg = True
-    if df.empty:
-        print("❌ ","データフレームが空です")
-        flg = False
-    if flg:
-        print("✅ ファイルは欠損していません。")
-    return df
+
 
 
 def update_duplicated(df_by_files,latest_year):

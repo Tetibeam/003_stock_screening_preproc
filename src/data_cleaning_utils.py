@@ -13,7 +13,7 @@ def chk_missing_values_expression(df, filename, option_value):
     Returns:
         pd.DataFrame: チェック結果のデータフレーム。
     """
-    COUNT_COLUMNS = ["col","empty", "space", "-", "―", "—", "--", "Na", "na", "N/A", "n/a", "None", "none", "NULL", "null", "0", "alphabet"]
+    COUNT_COLUMNS = ["col","empty", "space", "-", "―", "—", "--", "Na", "na", "N/A", "n/a", "None", "none", "NULL", "null", "0", "0.0", "alphabet"]
     FINAL_COLUMNS = COUNT_COLUMNS + ["ファイル名", "オプション値"] # 追跡を明確にするため
     df_placeholder_counts = pd.DataFrame(columns=FINAL_COLUMNS)
     current_index = 0
@@ -27,7 +27,7 @@ def chk_missing_values_expression(df, filename, option_value):
             (ser_str == '-').sum(), (ser_str == '―').sum(), (ser_str == '—').sum(), (ser_str == '--').sum(),
             (ser_str == 'Na').sum(), (ser_str == 'na').sum(), (ser_str == 'N/A').sum(), (ser_str == 'n/a').sum(),
             (ser_str == 'None').sum(), (ser_str == 'none').sum(), (ser_str == 'NULL').sum(), (ser_str == 'null').sum(),
-            (ser_str == '0').sum(), 
+            (ser_str == '0').sum(), (ser_str == '0.0').sum(),
             ser_str.str.contains('[A-Za-z]', na=False).sum()
         )
         df_placeholder_counts.loc[current_index, COUNT_COLUMNS] = row_data_tuple
@@ -35,6 +35,24 @@ def chk_missing_values_expression(df, filename, option_value):
         df_placeholder_counts.loc[current_index, "オプション値"] = option_value
         current_index += 1
     return df_placeholder_counts
+
+def chk_missing_and_suspect(df_placeholder_counts) -> dict:
+    """
+    欠損値や疑われるコードをチェックし、結果を辞書として返す関数。
+    Args:
+
+    Return:
+    """
+    df = df_placeholder_counts.drop(["ファイル名", "オプション値"], axis=1)
+    # 値0以上の列だけ残す
+    suspect_sum = df.groupby("col").sum().sum()[lambda x: x > 0]
+    print(suspect_sum)
+    # 結果を格納する辞書
+    result_dict = {}
+    for code in suspect_sum.index:
+        cols_with_code = df.loc[df[code] > 0, "col"].unique()
+        result_dict[code] = cols_with_code
+    return result_dict
 
 def chk_dtype(df: pd.DataFrame, filename:str, option_value:str, na_drop:bool=True) -> pd.DataFrame:
     """
@@ -87,7 +105,7 @@ def convert_columns_type(df: pd.DataFrame, columns: list[str], to_type: str, ver
             print("done")
         elif to_type == "float":
             # 無理な値は NaN にして float64 に
-            df[col] = pd.to_numeric(df[col], errors="coerce")
+            df[col] = pd.to_numeric(df[col], errors="coerce").astype("Float64")
         elif to_type == "str":
             # NaN も含めて文字列化
             df[col] = df[col].astype(str)
@@ -95,8 +113,6 @@ def convert_columns_type(df: pd.DataFrame, columns: list[str], to_type: str, ver
             raise ValueError(f"変換先型 '{to_type}' はサポートされていません。")
 
     return df
-
-
 
 
 

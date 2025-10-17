@@ -32,5 +32,49 @@ years:
   - 2025
 na_values:
   - ""
+  - "-"
+dtype_chk:
+  raw:
+    'コード': 'string'
+    '年度': 'datetime64[ns]'
+    '総資産': 'Float64'
+    '純資産': 'Float64'
+    '株主資本': 'Float64'
+    '利益剰余金': 'Float64'
+    '短期借入金': 'Float64'
+    '長期借入金': 'Float64'
+    'BPS': 'Float64'
+    '自己資本比率': 'Float64'
+    '自己資本': 'Float64'
+    '売上高': 'Float64'
+    '営業利益': 'Float64'
+    '経常利益': 'Float64'
+    '純利益': 'Float64'
+    'EPS': 'Float64'
+    'ROE': 'Float64'
+    'ROA': 'Float64'
+    '営業CF': 'Float64'
+    '投資CF': 'Float64'
+    '財務CF': 'Float64'
+    '設備投資': 'Float64'
+    '現金同等物': 'Float64'
+    '営業CFマージン': 'Float64'
+    '一株配当': 'Float64'
+    '剰余金の配当': 'Float64'
+    '自社株買い': 'Float64'
+    '配当性向': 'Float64'
+    '総還元性向': 'Float64'
+    '純資産配当率': 'Float64'
+  reference:
+    "日付": 'datetime64[ns]'
+    "コード": 'string'
+    "銘柄名": 'string'
+    "市場・商品区分": 'string'
+    "33業種コード": 'string'
+    "33業種区分": 'string'
+    "17業種コード": 'Int64'
+    "17業種区分": 'string'
+    "規模コード": 'Int64'
+    "規模区分": 'string'
 output:
   base_path: "./output"

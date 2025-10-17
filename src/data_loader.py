@@ -4,31 +4,35 @@ import pandas as pd
 import hashlib
 from collections import defaultdict
 
-def load_on_startup(base_path, folder, file, header):
+def load_on_startup(base_path: str, folder: str, file: str, header: int = 0, na_values: list[str] = []):
     """
-    ファイルをデータフレームで読み込みます。（型は強制的にstr）
-    
+    指定されたパスからCSVファイルを読み込み、データフレームを返します。
+
     Args:
-        base_path(str):ファイルが格納されているベースパス。
-        folder(str):フォルダ名
-        file(str):ファイル名
-    Return:
-        pd.DataFrame: 読み込んだファイル
+        base_path(str): ベースパス。
+        folder(str): フォルダ名。
+        file(str): ファイル名。
+        header(int): ヘッダー行。デフォルトは0。
+        na_values(list[str]): 欠損値として解釈する文字列のリスト。
+
+    Returns:
+        pd.DataFrame: 読み込まれたデータフレーム。ファイルが存在しない場合は空のデータフレーム。
+
     """
     file_path = os.path.join(base_path, folder, file)
     if os.path.exists(file_path):
-        df = pd.read_csv(file_path, header=header, keep_default_na=False, na_filter=False, dtype=str)
+        df = pd.read_csv(file_path, header=header, na_values=na_values)
     else:
         df = pd.DataFrame()
     return df
 
-def chk_file_missing(df):
+def chk_file_missing(df: pd.DataFrame):
     """
     データフレームが空か可動化を調べます。
     Args:
-        df (pd.DataFrame): チェックするデータフレーム。
+        df(pd.DataFrame): チェックするデータフレーム。
     Returns:
-        flg(bool):
+        fg(bool):
             True:ファイルが空でない
             False:ファイルが空
     """
@@ -38,9 +42,16 @@ def chk_file_missing(df):
         flg = False
     return flg
 
-def df_hash(df, ignore_order=False):
+def df_hash(df: pd.DataFrame, ignore_order: bool = False):
     """
+    データフレームのハッシュ値を計算します。
 
+    Args:
+        df (pd.DataFrame): ハッシュ値を計算するデータフレーム。
+        ignore_order (bool): Trueの場合、行の順序を無視します。デフォルトはFalse。
+
+    Returns:
+        str: データフレームのMD5ハッシュ値。
     """
     data_only = df.copy().fillna("").astype(str)
     if ignore_order:
@@ -50,7 +61,7 @@ def df_hash(df, ignore_order=False):
     h = hashlib.md5(pd.util.hash_pandas_object(data_only, index=True).values)
     return h.hexdigest()
 
-def chk_duplicate_dfs(df_dict, ignore_order=False, ignore_column_order=False):
+def chk_duplicate_dfs(df_dict: dict, ignore_order: bool =False, ignore_column_order: bool=False):
     """
     複数の DataFrame の中から重複しているものを検出する。
     

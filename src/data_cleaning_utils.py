@@ -2,14 +2,13 @@
 import os
 import pandas as pd
 
-
-def chk_missing_values_expression(df, filename, option_value):
+def chk_missing_values_expression(df: pd.DataFrame, filename: str, option_value: str) -> pd.DataFrame:
     """
     欠損値の表現をチェックします。
     Args:
-        df (pd.DataFrame): チェックするデータフレーム。
-        filename (str): ファイル名。
-        option_value (str): オプション値。
+        df（pd.DataFrame）: チェックするデータフレーム。
+        filename(str): ファイル名。
+        option_value(str): オプション値。
     Returns:
         pd.DataFrame: チェック結果のデータフレーム。
     """
@@ -36,12 +35,13 @@ def chk_missing_values_expression(df, filename, option_value):
         current_index += 1
     return df_placeholder_counts
 
-def chk_missing_and_suspect(df_placeholder_counts) -> dict:
+def chk_missing_and_suspect(df_placeholder_counts: pd.DataFrame) -> dict:
     """
-    欠損値や疑われるコードをチェックし、結果を辞書として返す関数。
+    重複している欠損値の表現をチェックします。
     Args:
-
-    Return:
+        df_placeholder_counts: 欠損値の表現をカウントしたデータフレーム。
+    Returns:
+        dict: 重複している欠損値の表現と、それを含む列名の辞書。
     """
     df = df_placeholder_counts.drop(["ファイル名", "オプション値"], axis=1)
     # 値0以上の列だけ残す
@@ -58,9 +58,10 @@ def chk_dtype(df: pd.DataFrame, filename:str, option_value:str, na_drop:bool=Tru
     """
     データ型をチェックします。
     Args:
-        df (pd.DataFrame): チェックするデータフレーム。
-        filename (str): ファイル名。
-        option_value (str): オプション値。
+        df(pd.DataFrame): チェックするデータフレーム。
+        filename(str): ファイル名。
+        option_value(str): オプション値。
+        na_drop(bool): NaNを除外して型をチェックするかどうか。
     Returns:
         pd.DataFrame: チェック結果のデータフレーム。
     """
@@ -82,11 +83,12 @@ def convert_columns_type(df: pd.DataFrame, columns: list[str], to_type: str, ver
     指定列を文字列から任意の型に変換します。
 
     Args:
-        df : 変換対象のデータフレーム
-        columns :変換対象列名リスト
-        to_type : 変換先型。'int', 'float', 'str' のいずれか
-        verbose : 変換ログを表示するか
-    Returns : 変換後のデータフレーム（コピー）
+        df(pd.DataFrame) : 変換対象のデータフレーム
+        columns(list[str]) :変換対象列名リスト
+        to_type(str) : 変換先型。'int', 'float', 'str' のいずれか
+        verbose(bool) : 変換ログを表示するか
+    Returns: 
+        pd.DataFrame: 変換後のデータフレーム（コピー）
     """
     df = df.copy()
 
@@ -102,10 +104,11 @@ def convert_columns_type(df: pd.DataFrame, columns: list[str], to_type: str, ver
         if to_type == "int":
             # 無理な値は NaN にして Int64(nullable) に
             df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
-            print("done")
+
         elif to_type == "float":
             # 無理な値は NaN にして float64 に
             df[col] = pd.to_numeric(df[col], errors="coerce").astype("Float64")
+
         elif to_type == "str":
             # NaN も含めて文字列化
             df[col] = df[col].astype(str)
@@ -114,5 +117,52 @@ def convert_columns_type(df: pd.DataFrame, columns: list[str], to_type: str, ver
 
     return df
 
+def chk_finale_dtype(df: pd.DataFrame, expected_dtype: dict):
+    """
+    最終的なデータ型をチェックします。
 
+    Args:
+        df(pd.DataFrame): チェックするデータフレーム。
+        expected_dtype(dict):
+            キーが列名、値が期待されるデータ型（例: {"col1": "int64", "col2": "object"}）。
+    Raises:
+        TypeError: データ型が期待と異なる場合に発生します。
 
+    """
+    for col in df:
+        actual_dtype_str = str(df[col].dtype)
+        expected_dtype_str = expected_dtype[col]
+        if actual_dtype_str != expected_dtype_str:
+            # 🚨 致命的なエラーとして処理を中断
+            raise TypeError(
+                f"🚨 Dtypeチェック失敗: カラム '{col}' のデータ型が一致しません。"
+                f"期待される型: '{expected_dtype_str}' | 実際の型: '{actual_dtype_str}'"
+            )
+
+def update_duplicated(df_by_files: pd.DataFrame, latest_year: int):
+    """
+    指定された最新年度のデータで、それ以前の年度の重複データを更新します。
+
+    Args:
+        df_by_files (pd.DataFrame): ファイルと年度をキーとするデータフレームの辞書。
+        latest_year (int): 最新とみなす年度。
+
+    Returns:
+        dict: 更新されたデータフレームの辞書。
+
+    """
+    cutoff = pd.to_datetime(f"{latest_year}-01-01")
+    return {
+        (file, year): (
+            (df_by_files[(file, year)]
+             .set_index(["コード", "年度"])
+             .update(
+                df_by_files.get((file, latest_year), pd.DataFrame())
+                .loc[lambda d: d["年度"] < cutoff]
+                .set_index(["コード", "年度"])
+             ) or df_by_files[(file, year)].set_index(["コード", "年度"])).reset_index()
+        )
+        for file in {f for f, _ in df_by_files.keys()}
+        for year in {y for f, y in df_by_files.keys() if f == file}
+        if (file, year) in df_by_files
+    }

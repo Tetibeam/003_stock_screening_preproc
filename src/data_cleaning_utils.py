@@ -2,82 +2,6 @@
 import os
 import pandas as pd
 
-def chk_missing_values_expression(df: pd.DataFrame, filename: str, option_value: str) -> pd.DataFrame:
-    """
-    欠損値の表現をチェックします。
-    Args:
-        df（pd.DataFrame）: チェックするデータフレーム。
-        filename(str): ファイル名。
-        option_value(str): オプション値。
-    Returns:
-        pd.DataFrame: チェック結果のデータフレーム。
-    """
-    COUNT_COLUMNS = ["col","empty", "space", "-", "―", "—", "--", "Na", "na", "N/A", "n/a", "None", "none", "NULL", "null", "0", "0.0", "alphabet"]
-    FINAL_COLUMNS = COUNT_COLUMNS + ["ファイル名", "オプション値"] # 追跡を明確にするため
-    df_placeholder_counts = pd.DataFrame(columns=FINAL_COLUMNS)
-    current_index = 0
-    for col in df:
-        ser = df[col].fillna(pd.NA)
-        ser_str = ser.astype(str)
-        #display(ser_str)
-        row_data_tuple = (
-            col,
-            (ser_str == '').sum(), (ser_str == ' ').sum(),
-            (ser_str == '-').sum(), (ser_str == '―').sum(), (ser_str == '—').sum(), (ser_str == '--').sum(),
-            (ser_str == 'Na').sum(), (ser_str == 'na').sum(), (ser_str == 'N/A').sum(), (ser_str == 'n/a').sum(),
-            (ser_str == 'None').sum(), (ser_str == 'none').sum(), (ser_str == 'NULL').sum(), (ser_str == 'null').sum(),
-            (ser_str == '0').sum(), (ser_str == '0.0').sum(),
-            ser_str.str.contains('[A-Za-z]', na=False).sum()
-        )
-        df_placeholder_counts.loc[current_index, COUNT_COLUMNS] = row_data_tuple
-        df_placeholder_counts.loc[current_index, "ファイル名"] = filename
-        df_placeholder_counts.loc[current_index, "オプション値"] = option_value
-        current_index += 1
-    return df_placeholder_counts
-
-def chk_missing_and_suspect(df_placeholder_counts: pd.DataFrame) -> dict:
-    """
-    重複している欠損値の表現をチェックします。
-    Args:
-        df_placeholder_counts: 欠損値の表現をカウントしたデータフレーム。
-    Returns:
-        dict: 重複している欠損値の表現と、それを含む列名の辞書。
-    """
-    df = df_placeholder_counts.drop(["ファイル名", "オプション値"], axis=1)
-    # 値0以上の列だけ残す
-    suspect_sum = df.groupby("col").sum().sum()[lambda x: x > 0]
-    print(suspect_sum)
-    # 結果を格納する辞書
-    result_dict = {}
-    for code in suspect_sum.index:
-        cols_with_code = df.loc[df[code] > 0, "col"].unique()
-        result_dict[code] = cols_with_code
-    return result_dict
-
-def chk_dtype(df: pd.DataFrame, filename:str, option_value:str, na_drop:bool=True) -> pd.DataFrame:
-    """
-    データ型をチェックします。
-    Args:
-        df(pd.DataFrame): チェックするデータフレーム。
-        filename(str): ファイル名。
-        option_value(str): オプション値。
-        na_drop(bool): NaNを除外して型をチェックするかどうか。
-    Returns:
-        pd.DataFrame: チェック結果のデータフレーム。
-    """
-    COUNT_COLUMNS = ["ファイル名", "オプション値", "列名", "dtype", "sample_types"]
-    df_type = pd.DataFrame(columns=COUNT_COLUMNS)
-    current_index = 0
-    for col in df.columns:
-        # 実際のデータ型を確認
-        dtype = df[col].dtype
-        sample_types = df[col].dropna().map(type).unique() if na_drop else df[col].map(type).unique()
-        row_data_tuple = (filename, option_value, col, dtype, sample_types)
-        df_type.loc[current_index, COUNT_COLUMNS] = row_data_tuple
-        #print(row_data_tuple)
-        current_index +=1
-    return df_type
-
 def convert_columns_type(df: pd.DataFrame, columns: list[str], to_type: str, verbose: bool = True) -> pd.DataFrame:
     """
     指定列を文字列から任意の型に変換します。
@@ -138,6 +62,61 @@ def chk_finale_dtype(df: pd.DataFrame, expected_dtype: dict):
                 f"🚨 Dtypeチェック失敗: カラム '{col}' のデータ型が一致しません。"
                 f"期待される型: '{expected_dtype_str}' | 実際の型: '{actual_dtype_str}'"
             )
+
+def chk_duplicated_data(df_by_files: dict)->dict:
+    """
+    Args:
+        df_by_files (pd.DataFrame): 結合されたデータフレーム。
+
+    Returns:
+        pd.DataFrame: 重複データのデータフレーム。
+    """
+
+    results = {"lower": [], "upper": []}
+
+    for (filename, year), df in df_by_files.items():
+        conditions = {
+            "lower": df["年度"].dt.year < year,
+            "upper": df["年度"].dt.year > year
+        }
+        for key, cond in conditions.items():
+            df_tmp = df.loc[cond, ["コード", "年度"]].copy()
+            if not df_tmp.empty:
+                df_tmp["ファイル名"] = filename
+                df_tmp["フォルダ名"] = year
+                results[key].append(df_tmp)
+
+    df_result_lower = pd.concat(results["lower"], ignore_index=True) if results["lower"] else pd.DataFrame()
+    df_result_upper = pd.concat(results["upper"], ignore_index=True) if results["upper"] else pd.DataFrame()
+    return df_result_lower, df_result_upper
+
+def update_duplicated_data(df_by_files: dict, df_result_lower: pd.DataFrame):
+    """
+    指定された最新年度のデータで、それ以前の年度の重複データを更新します。
+
+    Args:
+        df_by_files (pd.DataFrame): ファイルと年度をキーとするデータフレームの辞書。
+        df_result_lower (pd.DataFrame): 下限を超える重複データのデータフレーム。
+
+    Returns:
+        dict: 更新されたデータフレームの辞書。
+    """
+    df_tmp = df_by_files.copy()
+    for (f, y), df in df_by_files.items():
+        df_update_date = df_result_lower.query("ファイル名 == @f and フォルダ名 == @y")
+        if df_update_date.empty:
+            continue
+        df_update_source = df.set_index(["コード", "年度"])
+        df_update_source = df_update_source.loc[
+            df_update_date.set_index(["コード", "年度"]).index
+        ]
+        for key, df_target in df_tmp.items():
+            df_target_indexed = df_target.set_index(["コード", "年度"])
+            df_target_indexed.update(df_update_source)
+            df_tmp[key] = df_target_indexed.reset_index()
+    df_by_files_updated = df_tmp.copy()
+    return df_by_files_updated
+
 
 def update_duplicated(df_by_files: pd.DataFrame, latest_year: int):
     """

@@ -4,7 +4,10 @@ import pandas as pd
 import hashlib
 from collections import defaultdict
 
-def load_on_startup(base_path: str, folder: str, file: str, header: int = 0, na_values: list[str] = []):
+def load_on_startup(
+        base_path: str, folder: str, file: str,
+        header: int = 0, na_values: list[str] = [], force_str: bool=False
+    ):
     """
     指定されたパスからCSVファイルを読み込み、データフレームを返します。
 
@@ -14,6 +17,7 @@ def load_on_startup(base_path: str, folder: str, file: str, header: int = 0, na_
         file(str): ファイル名。
         header(int): ヘッダー行。デフォルトは0。
         na_values(list[str]): 欠損値として解釈する文字列のリスト。
+        force_str(bool): 文字列として読み込むかどうか。デフォルトはFalse。
 
     Returns:
         pd.DataFrame: 読み込まれたデータフレーム。ファイルが存在しない場合は空のデータフレーム。
@@ -21,9 +25,12 @@ def load_on_startup(base_path: str, folder: str, file: str, header: int = 0, na_
     """
     file_path = os.path.join(base_path, folder, file)
     if os.path.exists(file_path):
-        df = pd.read_csv(file_path, header=header, na_values=na_values)
+        if force_str:
+            df = pd.read_csv(file_path, header=header, dtype=str)
+        else:
+            df = pd.read_csv(file_path, header=header, na_values=na_values)
     else:
-        df = pd.DataFrame()
+        raise FileNotFoundError(f"ファイル '{file_path}' が見つかりません。")
     return df
 
 def chk_file_missing(df: pd.DataFrame):
@@ -38,7 +45,7 @@ def chk_file_missing(df: pd.DataFrame):
     """
     flg = True
     if df.empty:
-        print("❌ ","データフレームが空です")
+        raise KeyError("データフレームが空です")
         flg = False
     return flg
 
@@ -60,6 +67,28 @@ def df_hash(df: pd.DataFrame, ignore_order: bool = False):
     # 列名を無視して内容だけでハッシュを生成
     h = hashlib.md5(pd.util.hash_pandas_object(data_only, index=True).values)
     return h.hexdigest()
+
+def chk_duplicate_files_df(duplicates:dict):
+    """
+    データフレームの重複をチェックし、重複がある場合はエラーを発生させます。
+
+    Args:
+        duplicates (dict): 重複するデータフレームのハッシュとキーの辞書。
+                           `chk_duplicate_dfs` 関数によって生成されます。
+
+    Raises:
+        ValueError: 重複するデータフレームが検出された場合に発生します。
+
+    """
+    if duplicates:
+        msg_lines = []
+        for h, key_group in duplicates.items():
+            msg_lines.append(f"ハッシュ {h} の重複:")
+            for key in key_group:
+                msg_lines.append(f"  - {key}")
+
+        msg = "\n".join(msg_lines)
+        raise ValueError(f"重複データが検出されました:\n{msg}")
 
 def chk_duplicate_dfs(df_dict: dict, ignore_order: bool =False, ignore_column_order: bool=False):
     """
